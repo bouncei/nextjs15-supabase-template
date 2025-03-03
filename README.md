@@ -71,11 +71,11 @@ npm run start or yarn start
 ```bash
 nextjs15-supabase-template/
 ├── public/                 # Static assets
-├── app/                  # Next.js pages
+├── app/                    # Next.js pages
 ├── components/             # Reusable UI components
 ├── hooks/                  # Custom hooks
-├── constants/                  # Utility functions
-├── stores/                  # Zustand store
+├── constants/              # Utility functions
+├── stores/                 # Zustand store
 ├── lib/                    # Supabase client and other libraries
 ├── .env.local              # Environment variables
 ├── next.config.js          # Next.js configuration
