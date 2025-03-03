@@ -33,7 +33,7 @@ export async function updateSession(request: NextRequest) {
    */
 
   // Replace with your own authentication logic
-  const isPrivateRoute = !request.nextUrl.pathname.startsWith("/public-page"); // Modify this
+  const isPrivateRoute = !request.nextUrl.pathname.startsWith("/dashboard"); // Modify this
   const isAuthRoute = request.nextUrl.pathname.startsWith("/auth"); // Modify this
 
   if (!user && isPrivateRoute) {
@@ -56,21 +56,8 @@ export async function updateSession(request: NextRequest) {
    */
 
   if (user) {
-    const userRole = user.user_metadata?.role || "user"; // Adjust based on your Supabase user metadata
-
-    if (
-      userRole === "admin" &&
-      request.nextUrl.pathname.startsWith("/user-dashboard")
-    ) {
-      return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-    }
-
-    if (
-      userRole === "user" &&
-      request.nextUrl.pathname.startsWith("/admin-dashboard")
-    ) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+    // Redirect authenticated users to dashboard
+    return NextResponse.redirect(new URL("/dashboard", request.url)); // MODIFY THIS
   }
 
   // Return the updated response with session cookies
