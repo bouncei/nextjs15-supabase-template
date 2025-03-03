@@ -2,18 +2,27 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next();
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
 
-  // Initialize Supabase server client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) => {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
           );
         },
       },
@@ -36,30 +45,19 @@ export async function updateSession(request: NextRequest) {
   const isPrivateRoute = !request.nextUrl.pathname.startsWith("/dashboard"); // Modify this
   const isAuthRoute = request.nextUrl.pathname.startsWith("/auth"); // Modify this
 
-  if (!user && isPrivateRoute) {
-    // Redirect to login page if user is not authenticated
-    const url = new URL("/sign-in", request.url); // Modify this
-    url.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (user && isAuthRoute) {
-    // Redirect authenticated users away from authentication pages
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  /**
-   * Role-Based Access Control (Optional)
-   *
-   * - Redirect users based on their role.
-   * - Modify this logic to match your application's user roles.
-   */
-
-  if (user) {
-    // Redirect authenticated users to dashboard
-    return NextResponse.redirect(new URL("/dashboard", request.url)); // MODIFY THIS
-  }
+  // IMPORTANT: You *must* return the supabaseResponse object as it is.
+  // If you're creating a new response object with NextResponse.next() make sure to:
+  // 1. Pass the request in it, like so:
+  //    const myNewResponse = NextResponse.next({ request })
+  // 2. Copy over the cookies, like so:
+  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
+  // 3. Change the myNewResponse object to fit your needs, but avoid changing
+  //    the cookies!
+  // 4. Finally:
+  //    return myNewResponse
+  // If this is not done, you may be causing the browser and server to go out
+  // of sync and terminate the user's session prematurely!
 
   // Return the updated response with session cookies
-  return response;
+  return supabaseResponse;
 }
