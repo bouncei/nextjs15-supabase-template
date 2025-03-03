@@ -74,6 +74,7 @@ nextjs15-supabase-template/
 ├── app/                    # Next.js pages
 ├── components/             # Reusable UI components
 ├── hooks/                  # Custom hooks
+├── providers/              # Context providers
 ├── constants/              # Utility functions
 ├── stores/                 # Zustand store
 ├── lib/                    # Supabase client and other libraries
